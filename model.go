@@ -328,5 +328,4 @@ func (s *{TplDaoName}) Create(in *{TplModelName}) error {
 func (s *{TplDaoName}) Update(in *{TplModelName})  error {
 	return s.db.Model(&{TplModelName}{}).Updates(in).Error
 }
-
 `

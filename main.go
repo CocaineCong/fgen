@@ -10,14 +10,10 @@ import (
 )
 
 const (
-	// 默认生成model的路径
-	DefaultGenModelPath = "./repository/dao/"
-	// 默认的配置文件路径
-	DefaultConfigPath = "config/local/config.yml"
-	// 默认的mysql的key
-	DefaultKey = "default"
-	// 版本号
-	Version = "0.0.1"
+	DefaultGenModelPath = "./repository/dao/"       // 默认生成model的路径
+	DefaultConfigPath   = "config/local/config.yml" // 默认的配置文件路径
+	DefaultKey          = "default"                 // 默认的mysql的key
+	Version             = "0.0.1"                   // 版本号
 )
 
 func main() {
@@ -33,7 +29,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:  "group",
-					Usage: "set eht project group",
+					Usage: "set the project group",
 				},
 				cli.StringFlag{
 					Name:  "b",
