@@ -1,4 +1,4 @@
-package project
+package main
 
 const (
 	defaultGroup = "fanone"

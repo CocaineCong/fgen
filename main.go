@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/CocaineCong/fgen/project"
 	"github.com/urfave/cli"
 )
 
@@ -53,7 +52,7 @@ func main() {
 				}
 
 				b := ctx.String("b")
-				return project.GenProject(group, name, b)
+				return GenProject(group, name, b)
 			},
 		},
 		{
@@ -91,7 +90,7 @@ func main() {
 				if _type != "" {
 					options = strings.Split(_type, ",")
 				}
-				return pprof.GenReport(ip, seconds, line, options...)
+				return GenReport(ip, seconds, line, options...)
 			},
 		},
 		{
@@ -112,7 +111,7 @@ func main() {
 			Usage:     "gen version",
 			Action: func(ctx *cli.Context) {
 				fmt.Println(Version)
-				return nil
+				return
 			},
 		},
 	}

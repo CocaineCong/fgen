@@ -1,4 +1,4 @@
-package pprof
+package main
 
 import (
 	"bufio"
@@ -18,7 +18,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CocaineCong/fgen/utils"
 	"github.com/gogf/gf/util/gconv"
 	excelize "github.com/xuri/excelize/v2"
 )
@@ -552,7 +551,7 @@ func exportExcel(appName string, result *Result) error {
 			continue
 		}
 		sheetName := tf.Tag.Get("sheet")
-		xlsx, err = utils.WriteXlsx(xlsx, sheetName, gconv.Interfaces(vf.Interface()))
+		xlsx, err = WriteXlsx(xlsx, sheetName, gconv.Interfaces(vf.Interface()))
 		if err != nil {
 			logger.Println(err)
 		}
