@@ -183,9 +183,10 @@ func modelAction(v2 bool) func(ctx *cli.Context) error {
 
 		tables := strings.Split(t, ",")
 		if v2 {
-			return modelv2.GenModel(dsn, path, "", configPath, key, tables...)
+			return GenModelV2(dsn, path, "", configPath, key, tables...)
 		} else {
-			return model.GenModel(dsn, path, configPath, key, tables...)
+			// return GenModel(dsn, path, configPath, key, tables...)
+			return nil
 		}
 	}
 }
