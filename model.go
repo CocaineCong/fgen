@@ -33,12 +33,13 @@ type Mysql struct {
 	Dialect  string `yaml:"dialect"`
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
-	DBName   string `yaml:"DBName"`
+	DBName   string `yaml:"dbName"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
+	Charset  string `yaml:"charset"`
 }
 
-func GenModelV2(dsn, genPath, genPkg, configPath, key string, tables ...string) error {
+func GenModelV2(ctx context.Context, dsn, genPath, genPkg, configPath, key string, tables ...string) error {
 	if genPath == "" {
 		// 外层能保证不为空
 		genPath = "_output/model"
@@ -75,12 +76,13 @@ func GenModelV2(dsn, genPath, genPkg, configPath, key string, tables ...string) 
 			return err
 		}
 		dbNode = gdb.ConfigNode{
-			Host: mysqlInfo.Host,
-			Port: mysqlInfo.Port,
-			User: mysqlInfo.User,
-			Pass: mysqlInfo.Password,
-			Name: mysqlInfo.DBName,
-			Type: mysqlInfo.Dialect,
+			Host:    mysqlInfo.Host,
+			Port:    mysqlInfo.Port,
+			User:    mysqlInfo.User,
+			Pass:    mysqlInfo.Password,
+			Name:    mysqlInfo.DBName,
+			Type:    mysqlInfo.Dialect,
+			Charset: mysqlInfo.Charset,
 		}
 	}
 
@@ -111,7 +113,7 @@ func GenModelV2(dsn, genPath, genPkg, configPath, key string, tables ...string) 
 		if table == "" {
 			continue
 		}
-		genModelContentFile(genPkg, db, table, genPath)
+		genModelContentFile(ctx, genPkg, db, table, genPath)
 	}
 	glog.Print("done!")
 	return nil
@@ -152,12 +154,13 @@ func genStructDefinition(camelName string, fieldMap map[string]*gdb.TableField) 
 	tw.SetBorder(false)
 	tw.SetRowLine(false)
 	tw.SetAutoWrapText(false)
+	tw.SetCenterSeparator("")
 	tw.AppendBulk(array)
 	tw.Render()
 
 	stContent := buffer.String()
-
 	stContent = gstr.Replace(stContent, " #", "")
+	stContent = gstr.Replace(stContent, " |", "")
 	buffer.Reset()
 	buffer.WriteString("type ")
 	buffer.WriteString(camelName + " struct{\n")
@@ -222,11 +225,15 @@ func genStructField(field *gdb.TableField) []string {
 	if gstr.ContainsI(field.Key, "pri") {
 		ormTag = ormTag + ";primary_key;"
 	}
+	comment = gstr.ReplaceIByArray(field.Comment, g.SliceStr{
+		"\n", "",
+		"\r", "",
+	})
 	comment = gstr.Trim(comment)
 
 	gorm := fmt.Sprintf("`"+`gorm:"column:%s"`+"`", ormTag)
 	as := []string{
-		"   #" + gstr.CamelCase(field.Name),
+		"   #" + gstr.CaseCamel(field.Name),
 		" #" + typeName,
 		" #" + gorm,
 	}
@@ -238,17 +245,18 @@ func genStructField(field *gdb.TableField) []string {
 	return as
 }
 
-func genModelContentFile(genPkg string, db gdb.DB, table, folderPath string) {
-	fieldMap, err := db.TableFields(context.Background(), table)
+func genModelContentFile(ctx context.Context, genPkg string, db gdb.DB, table, folderPath string) {
+	fmt.Println("table", table)
+	fieldMap, err := db.TableFields(ctx, table)
 	if err != nil {
 		glog.Fatal("fetching tables fields failed for table: %s :\n %v", table, err)
 	}
 	variable := gstr.TrimLeftStr(table, ",")
-	camelName := gstr.CamelCase(variable)
+	camelName := gstr.CaseCamel(variable)
 	modelName := fmt.Sprintf("%sModel", camelName)
 	structDefine := genStructDefinition(modelName, fieldMap)
 
-	fileName := gstr.Trim(gstr.SnakeCase(variable), "-_.")
+	fileName := gstr.Trim(gstr.CaseSnake(variable), "-_.")
 	path := gfile.Join(folderPath, fileName+".go")
 
 	if !gfile.IsEmpty(path) {
@@ -261,13 +269,13 @@ func genModelContentFile(genPkg string, db gdb.DB, table, folderPath string) {
 	if gstr.ContainsI(structDefine, "time.Time") {
 		timePackage = `"time"`
 	}
-
+	fmt.Println("structDefine", structDefine)
 	entityContent := gstr.ReplaceByMap(modelTemplate, g.MapStrStr{
 		"{package}":         genPkg,
 		"{TimePackage}":     timePackage,
 		"{TplTableName}":    table,
 		"{TplModelName}":    modelName,
-		"{TplDaoName}":      gstr.CamelLowerCase(camelName) + "Dao",
+		"{TplDaoName}":      gstr.CaseCamelLower(camelName) + "Dao",
 		"{TplUpperDaoName}": camelName + "Dao",
 		"{TplStructDefine}": structDefine,
 		"{TplStructReport}": structDefine,
@@ -275,11 +283,11 @@ func genModelContentFile(genPkg string, db gdb.DB, table, folderPath string) {
 
 	bts, err := format.Source([]byte(entityContent))
 	if err != nil {
-		glog.Fatal("fmt err:%+v", err)
+		glog.Fatalf("fmt err:%v", err)
 	}
 
 	if err := gfile.PutContents(path, string(bts)); err != nil {
-		glog.Fatal("writing content to %s failed:%v", path, err)
+		glog.Fatalf("writing content to %s failed:%v", path, err)
 	} else {
 		glog.Print("generated:", path)
 	}
@@ -296,7 +304,7 @@ import (
 {TplStructDefine}
 
 func (*{TplModelName}) TableName() string{
-	return "{TplModelName}"
+	return "{TplTableName}"
 }
 
 type {TplDaoName} struct{
@@ -325,7 +333,7 @@ func (s *{TplDaoName}) Create(in *{TplModelName}) error {
 	return s.db.Create(in).Error
 }
 
-func (s *{TplDaoName}) Update(in *{TplModelName})  error {
+func (s *{TplDaoName}) Update(in *{TplModelName}) error {
 	return s.db.Model(&{TplModelName}{}).Updates(in).Error
 }
 `

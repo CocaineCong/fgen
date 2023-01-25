@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -10,10 +11,10 @@ import (
 )
 
 const (
-	DefaultGenModelPath = "./repository/dao/"       // 默认生成model的路径
-	DefaultConfigPath   = "config/local/config.yml" // 默认的配置文件路径
-	DefaultKey          = "default"                 // 默认的mysql的key
-	Version             = "0.0.1"                   // 版本号
+	DefaultGenModelPath = "./repository/dao/"        // 默认生成model的路径
+	DefaultConfigPath   = "config/local/config.yaml" // 默认的配置文件路径
+	DefaultKey          = "default"                  // 默认的mysql的key
+	Version             = "0.0.1"                    // 版本号
 )
 
 func main() {
@@ -125,7 +126,7 @@ func modelFlag() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:  "dsn", // Data Source Name
-			Usage: "mysql link dsn , default read config/local/config.yml",
+			Usage: "mysql link dsn , default read config/local/config.yaml",
 		},
 		cli.StringFlag{
 			Name:  "t",
@@ -137,7 +138,7 @@ func modelFlag() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:  "c",
-			Usage: "config.yml path",
+			Usage: "config.yaml path",
 		},
 		cli.StringFlag{
 			Name:  "k",
@@ -179,7 +180,7 @@ func modelAction(v2 bool) func(ctx *cli.Context) error {
 
 		tables := strings.Split(t, ",")
 		if v2 {
-			return GenModelV2(dsn, path, "", configPath, key, tables...)
+			return GenModelV2(context.Background(), dsn, path, "", configPath, key, tables...)
 		} else {
 			// return GenModel(dsn, path, configPath, key, tables...)
 			return nil

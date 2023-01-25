@@ -1,0 +1,33 @@
+server:
+  domain: hellostory
+  version: 1.0
+  jwtSecret: FanOneSecret
+  grpcAddress: "127.0.0.1:10001"
+
+mysql:
+  default:
+    dialect: "mysql"
+    host: "127.0.0.1"
+    port: "3306"
+    dbName: "hello_story"
+    user: "root"
+    password: "root"
+    charset: "utf8mb4"
+
+
+redis:
+  name: 4
+  address: 127.0.0.1:6379
+  password:
+
+email:
+  address: http://localhost:8080/#/vaild/email/
+  smtpHost: smtp.qq.com
+  smtpEmail: 294350394@qq.com
+  smtpPass: xpattsfmyzascahj
+
+qiniu:
+  accessKey: OK9bPk4pCopfd5GezCB5tZKsGQZZt8WpHegWnVfm
+  secretKey: dl9sVQXEH3TDhxSVeou63f_XsufSCfNjMwrI6vky
+  bucket: hellostorytest
+  qiNiuServer: http://rl90hr0ch.bkt.clouddn.com
