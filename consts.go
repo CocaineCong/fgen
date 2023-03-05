@@ -80,6 +80,7 @@ func InitConfig() {
 	}
 }
 `
+
 const cmdTemplate = `
 package main
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gfile"
@@ -51,13 +52,28 @@ func GenProject(projectName string) error {
 				"{module}":  projectName[:len(projectName)-1],
 				"{version}": version,
 			})
-			writeFile(genModsPath, entityContent)
+			if err := writeFile(genModsPath, entityContent); err != nil {
+				return err
+			}
+
 		case genConfigPath:
-			if err := gfile.Mkdir(genPath); err != nil {
+			if err := gfile.Mkdir(genConfigPath); err != nil {
 				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
 			}
-			configGo := genPath + "local/config.go"
-			writeFile(genModsPath, configGo)
+			yamlPath := genConfigPath + "local/config.yaml"
+			entityContent := gstr.ReplaceByMap(configYamlTemplate, g.MapStrStr{
+				"{domain}": projectName[:len(projectName)-1],
+			})
+
+			if err := writeFile(yamlPath, entityContent); err != nil {
+				return err
+			}
+
+			entityContent = strings.Replace(configGolangTemplate, "'", "`", -1)
+			configGo := genConfigPath + "config.go"
+			if err := writeFile(configGo, entityContent); err != nil {
+				return err
+			}
 
 		default:
 			if err := gfile.Mkdir(genPath); err != nil {
