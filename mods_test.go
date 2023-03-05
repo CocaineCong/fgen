@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+func TestGenModelV2(t *testing.T) {
+
+}
+
 func TestGenProject(t *testing.T) {
 	projectPath := "/Users/mac/GolandProjects/genTest/"
 	err := GenProject(projectPath, "")

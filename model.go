@@ -316,7 +316,7 @@ func New{TplUpperDaoName}(db *gormv2.DB) *{TplDaoName}{
 }
 
 func (s *{TplDaoName}) Get(in *{TplModelName}) (*{TplModelName},error) {
-	var r {TplDaoName}
+	var r {TplModelName}
 	err := s.db.Where(in).Find(&r).Error
 	return &r,err
 }
