@@ -48,8 +48,8 @@ func main() {
 					group = "sns"
 				}
 
-				b := ctx.String("b")
-				return GenProject(group, name, b)
+				// b := ctx.String("b")
+				return GenProject(name)
 			},
 		},
 		{

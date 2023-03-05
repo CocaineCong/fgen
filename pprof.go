@@ -465,7 +465,7 @@ func DownloadFireCPU(ip, appName string, seconds int) error {
 // option：goroutine、heaps、profile
 // waitTime：两次打点差异
 func Comparison(ip, option string, waitTime int) ([]*FlatCum, error) {
-	fmt.Println("打点比较%s...\n", option)
+	fmt.Printf("打点比较%s...\n\n", option)
 	url := fmt.Sprintf("http://%s/debug/pprof/%s", ip, option)
 	// 打第一个点
 	f1 := timerInfo(url, "001")

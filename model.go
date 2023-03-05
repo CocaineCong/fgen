@@ -246,7 +246,6 @@ func genStructField(field *gdb.TableField) []string {
 }
 
 func genModelContentFile(ctx context.Context, genPkg string, db gdb.DB, table, folderPath string) {
-	fmt.Println("table", table)
 	fieldMap, err := db.TableFields(ctx, table)
 	if err != nil {
 		glog.Fatal("fetching tables fields failed for table: %s :\n %v", table, err)
@@ -260,7 +259,7 @@ func genModelContentFile(ctx context.Context, genPkg string, db gdb.DB, table, f
 	path := gfile.Join(folderPath, fileName+".go")
 
 	if !gfile.IsEmpty(path) {
-		s := gcmd.Scanf("the '%s' is exist, files might be overwrote, continue?[y/n]:")
+		s := gcmd.Scanf("the '%s' is exist, files might be overwrote, continue?[y/n]:", path)
 		if strings.EqualFold(s, "n") {
 			return
 		}
@@ -269,7 +268,6 @@ func genModelContentFile(ctx context.Context, genPkg string, db gdb.DB, table, f
 	if gstr.ContainsI(structDefine, "time.Time") {
 		timePackage = `"time"`
 	}
-	fmt.Println("structDefine", structDefine)
 	entityContent := gstr.ReplaceByMap(modelTemplate, g.MapStrStr{
 		"{package}":         genPkg,
 		"{TimePackage}":     timePackage,
