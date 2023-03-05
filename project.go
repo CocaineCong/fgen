@@ -51,19 +51,13 @@ func GenProject(projectName string) error {
 				"{module}":  projectName[:len(projectName)-1],
 				"{version}": version,
 			})
-
-			file, err := os.OpenFile(genModsPath, os.O_WRONLY|os.O_CREATE, 0666)
-			if err != nil {
-				fmt.Println("文件打开失败", err)
+			writeFile(genModsPath, entityContent)
+		case genConfigPath:
+			if err := gfile.Mkdir(genPath); err != nil {
+				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
 			}
-			defer file.Close()
-			// 写入文件时，使用带缓存的 *Writer
-			write := bufio.NewWriter(file)
-			_, err = write.WriteString(entityContent)
-			if err != nil {
-				return err
-			}
-			write.Flush()
+			configGo := genPath + "local/config.go"
+			writeFile(genModsPath, configGo)
 
 		default:
 			if err := gfile.Mkdir(genPath); err != nil {
@@ -82,6 +76,19 @@ func getGolangVersion() (string, error) {
 	return "", errors.New("不存在")
 }
 
-const modsTemplate = `module {module}
+func writeFile(path, content string) error {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println("文件打开失败", err)
+	}
+	defer file.Close()
+	// 写入文件时，使用带缓存的 *Writer
+	write := bufio.NewWriter(file)
+	_, err = write.WriteString(content)
+	if err != nil {
+		return err
+	}
+	err = write.Flush()
 
-go {version}`
+	return err
+}
