@@ -246,7 +246,7 @@ func GoroutineMaxWaitTime(ip string) ([]*GoWaitInfo, error) {
 
 	stacks := strings.Split(string(bs), "\n\n")
 
-	re := regexp.MustCompile(`goroutine\s([0-9]*\s\[(.*),\s([0-9]*)\sminutes\]`)
+	re := regexp.MustCompile(`goroutine\s([0-9]*\s\[(.*),\s([0-9]*)\sminutes\])`)
 	var infos []*GoWaitInfo
 	for _, s := range stacks {
 		match := re.FindStringSubmatch(s)
