@@ -86,13 +86,11 @@ package main
 
 import (
 	"{configPath}/config"
-	"{configPath}/loading"
-	"{configPath}/router"
+	"{routerPath}/router"
 )
 
 func main() {
 	config.InitConfig()
-	loading.Loading()
 	r := router.NewRouter()
 	_ = r.Run(config.Config.System.HttpPort)
 }

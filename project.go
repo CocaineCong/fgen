@@ -60,6 +60,9 @@ func GenProject(projectName string) error {
 			if err := gfile.Mkdir(genConfigPath); err != nil {
 				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
 			}
+			if err := gfile.Mkdir(genConfigPath + "local/"); err != nil {
+				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
+			}
 			yamlPath := genConfigPath + "local/config.yaml"
 			entityContent := gstr.ReplaceByMap(configYamlTemplate, g.MapStrStr{
 				"{domain}": projectName[:len(projectName)-1],
@@ -72,6 +75,19 @@ func GenProject(projectName string) error {
 			entityContent = strings.Replace(configGolangTemplate, "'", "`", -1)
 			configGo := genConfigPath + "config.go"
 			if err := writeFile(configGo, entityContent); err != nil {
+				return err
+			}
+
+		case genCmdPath:
+			if err := gfile.Mkdir(genCmdPath); err != nil {
+				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
+			}
+			cmdPath := genCmdPath + "main.go"
+			entityContent := gstr.ReplaceByMap(cmdTemplate, g.MapStrStr{
+				"{configPath}": projectName[:len(projectName)-1],
+				"{routerPath}": projectName[:len(projectName)-1],
+			})
+			if err := writeFile(cmdPath, entityContent); err != nil {
 				return err
 			}
 
@@ -89,7 +105,7 @@ func getGolangVersion() (string, error) {
 	if ver != "" {
 		return ver[2:6], nil
 	}
-	return "", errors.New("不存在")
+	return "", errors.New("golang 环境不存在")
 }
 
 func writeFile(path, content string) error {
