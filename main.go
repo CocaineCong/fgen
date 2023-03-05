@@ -49,7 +49,7 @@ func main() {
 				}
 
 				// b := ctx.String("b")
-				return GenProject(name)
+				return GenProject("", name)
 			},
 		},
 		{

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 
@@ -20,26 +21,31 @@ const (
 	defaultPath  = "./fanone"
 )
 
-func GenProject(projectName string) error {
+func GenProject(projectPath, projectName string) error {
+
+	if projectPath == "" {
+		projectPath = "./"
+	}
+
 	if projectName == "" {
 		// 外层能保证不为空
 		projectName = "demo/"
 	}
 
-	genApiPath := projectName + "api/"
-	genCmdPath := projectName + "cmd/"
-	genConfigPath := projectName + "config/"
-	genConstsPath := projectName + "consts/"
-	genLoadingPath := projectName + "loading/"
-	genMiddlewarePath := projectName + "middleware/"
-	genPkgPath := projectName + "pkg/"
-	genRepositoryPath := projectName + "repository/"
-	genRouterPath := projectName + "router/"
-	genSerializerPath := projectName + "serializer/"
-	genServicePath := projectName + "service/"
-	genTestPath := projectName + "test/"
-	genTypesPath := projectName + "types/"
-	genModsPath := projectName + "go.mod"
+	genApiPath := projectPath + projectName + "api/"
+	genCmdPath := projectPath + projectName + "cmd/"
+	genConfigPath := projectPath + projectName + "config/"
+	genConstsPath := projectPath + projectName + "consts/"
+	genLoadingPath := projectPath + projectName + "loading/"
+	genMiddlewarePath := projectPath + projectName + "middleware/"
+	genPkgPath := projectPath + projectName + "pkg/"
+	genRepositoryPath := projectPath + projectName + "repository/"
+	genRouterPath := projectPath + projectName + "router/"
+	genSerializerPath := projectPath + projectName + "serializer/"
+	genServicePath := projectPath + projectName + "service/"
+	genTestPath := projectPath + projectName + "test/"
+	genTypesPath := projectPath + projectName + "types/"
+	genModsPath := projectPath + projectName + "go.mod"
 
 	genPaths := []string{genApiPath, genCmdPath, genConfigPath, genConstsPath, genLoadingPath, genMiddlewarePath, genPkgPath, genRepositoryPath, genRouterPath, genSerializerPath, genServicePath, genTestPath, genTypesPath, genModsPath}
 
@@ -91,12 +97,58 @@ func GenProject(projectName string) error {
 				return err
 			}
 
+		case genRouterPath:
+			if err := gfile.Mkdir(genRouterPath); err != nil {
+				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
+			}
+			routerPath := genRouterPath + "router.go"
+			entityContent := gstr.ReplaceByMap(routerTemplate, g.MapStrStr{
+				"{module}": projectName[:len(projectName)-1],
+			})
+			if err := writeFile(routerPath, entityContent); err != nil {
+				return err
+			}
+
+		case genMiddlewarePath:
+			if err := gfile.Mkdir(genMiddlewarePath); err != nil {
+				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
+			}
+			middlewarePath := genMiddlewarePath + "cors.go"
+			entityContent := gstr.ReplaceByMap(middlewareCorsTemplate, g.MapStrStr{
+				"{module}": projectName[:len(projectName)-1],
+			})
+			if err := writeFile(middlewarePath, entityContent); err != nil {
+				return err
+			}
+
 		default:
 			if err := gfile.Mkdir(genPath); err != nil {
 				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
 			}
 		}
 	}
+
+	pingCmd := exec.Command("ping", "-c 5 baidu.com")
+	_, err := pingCmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("err", err)
+		return err
+	}
+
+	entityContent := gstr.ReplaceByMap(ScriptCmdTemplate, g.MapStrStr{
+		"{path}": projectPath + projectName[:len(projectName)-1],
+	})
+	scriptPath := projectPath + "start.sh"
+	if err := writeFile(scriptPath, entityContent); err != nil {
+		return err
+	}
+	cmd := exec.Command("bash", scriptPath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("err", err)
+		return err
+	}
+	fmt.Println("output", string(output))
 	return nil
 }
 
