@@ -36,18 +36,24 @@ func GenProject(projectPath, projectName string) error {
 	genCmdPath := projectPath + projectName + "cmd/"
 	genConfigPath := projectPath + projectName + "config/"
 	genConstsPath := projectPath + projectName + "consts/"
-	genLoadingPath := projectPath + projectName + "loading/"
 	genMiddlewarePath := projectPath + projectName + "middleware/"
 	genPkgPath := projectPath + projectName + "pkg/"
 	genRepositoryPath := projectPath + projectName + "repository/"
+	genRepositoryDbPath := projectPath + projectName + "repository/db/"
+	genRepositoryModelPath := projectPath + projectName + "repository/db/model"
+	genRepositoryDaoPath := projectPath + projectName + "repository/db/dao"
+	genRepositoryCachePath := projectPath + projectName + "repository/cache"
 	genRouterPath := projectPath + projectName + "router/"
-	genSerializerPath := projectPath + projectName + "serializer/"
 	genServicePath := projectPath + projectName + "service/"
 	genTestPath := projectPath + projectName + "test/"
 	genTypesPath := projectPath + projectName + "types/"
 	genModsPath := projectPath + projectName + "go.mod"
 
-	genPaths := []string{genApiPath, genCmdPath, genConfigPath, genConstsPath, genLoadingPath, genMiddlewarePath, genPkgPath, genRepositoryPath, genRouterPath, genSerializerPath, genServicePath, genTestPath, genTypesPath, genModsPath}
+	genPaths := []string{genApiPath, genCmdPath, genConfigPath, genConstsPath,
+		genMiddlewarePath, genPkgPath, genRepositoryPath,
+		genRouterPath, genServicePath, genRepositoryDbPath,
+		genRepositoryModelPath, genRepositoryDaoPath, genRepositoryCachePath,
+		genTestPath, genTypesPath, genModsPath}
 
 	for _, genPath := range genPaths {
 
