@@ -16,3 +16,4 @@
 .idea
 config
 fgen
+pprof.go

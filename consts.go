@@ -4,8 +4,7 @@ const modsTemplate = `module {module}
 
 go {version}`
 
-const configYamlTemplate = `
-system:
+const configYamlTemplate = `system:
   domain: {domain}
   version: 1.0
   appEnv: "test"
@@ -23,13 +22,14 @@ mysql:
     charset: "utf8mb4"
 
 redis:
-  name: 1
-  address: 127.0.0.1:6379
-  password: 
+  redisDbName: 1
+  redisHost: 127.0.0.1
+  redisPort: 6379
+  redisPassword: 123456
+  redisNetwork: tcp
 `
 
-const configGolangTemplate = `
-package config
+const configGolangTemplate = `package config
 
 import (
 	"os"
@@ -56,11 +56,11 @@ type MySql struct {
 }
 
 type Redis struct {
-	Host     string 'yaml:"redisHost"'
-	Port     string 'yaml:"redisPort"'
-	Password string 'yaml:"redisPwd"'
-	DbName   int    'yaml:"redisDbName"'
-	Network  string 'yaml:"redisNetwork"'
+	RedisHost     string 'yaml:"redisHost"'
+	RedisPort     string 'yaml:"redisPort"'
+	RedisPassword string 'yaml:"redisPassword"'
+	RedisDbName   int    'yaml:"redisDbName"'
+	RedisNetwork  string 'yaml:"redisNetwork"'
 }
 
 type System struct {
@@ -88,8 +88,7 @@ func InitConfig() {
 }
 `
 
-const cmdTemplate = `
-package main
+const cmdTemplate = `package main
 
 import (
 	"{configPath}/config"
@@ -103,11 +102,9 @@ func main() {
 }
 `
 
-const routerTemplate = `
-package router
+const routerTemplate = `package router
 
 import (
-	"{module}/api"
 	"{module}/middleware"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"

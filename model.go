@@ -31,15 +31,15 @@ type ConfigMap struct {
 
 type Mysql struct {
 	Dialect  string `yaml:"dialect"`
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
+	DbHost   string `yaml:"dbHost"`
+	DbPort   string `yaml:"dbPort"`
 	DBName   string `yaml:"dbName"`
-	User     string `yaml:"user"`
+	UserName string `yaml:"userName"`
 	Password string `yaml:"password"`
 	Charset  string `yaml:"charset"`
 }
 
-func GenModelV2(ctx context.Context, dsn, genPath, genPkg, configPath, key string, tables ...string) error {
+func GenModel(ctx context.Context, dsn, genPath, genPkg, configPath, key string, tables ...string) error {
 	if genPath == "" {
 		// 外层能保证不为空
 		genPath = "_output/model"
@@ -76,9 +76,9 @@ func GenModelV2(ctx context.Context, dsn, genPath, genPkg, configPath, key strin
 			return err
 		}
 		dbNode = gdb.ConfigNode{
-			Host:    mysqlInfo.Host,
-			Port:    mysqlInfo.Port,
-			User:    mysqlInfo.User,
+			Host:    mysqlInfo.DbHost,
+			Port:    mysqlInfo.DbPort,
+			User:    mysqlInfo.UserName,
 			Pass:    mysqlInfo.Password,
 			Name:    mysqlInfo.DBName,
 			Type:    mysqlInfo.Dialect,
@@ -291,11 +291,10 @@ func genModelContentFile(ctx context.Context, genPkg string, db gdb.DB, table, f
 	}
 }
 
-const modelTemplate = `
-package {package}
+const modelTemplate = `package {package}
 
 import (
-	gormv2 "gorm.io/gorm"
+	"gorm.io/gorm"
 	{TimePackage}
 )
 
@@ -306,10 +305,10 @@ func (*{TplModelName}) TableName() string{
 }
 
 type {TplDaoName} struct{
-	db *gormv2.DB
+	db *gorm.DB
 }
 
-func New{TplUpperDaoName}(db *gormv2.DB) *{TplDaoName}{
+func New{TplUpperDaoName}(db *gorm.DB) *{TplDaoName}{
 	return &{TplDaoName}{
 		db:db,
 	}
@@ -319,6 +318,11 @@ func (s *{TplDaoName}) Get(in *{TplModelName}) (*{TplModelName},error) {
 	var r {TplModelName}
 	err := s.db.Where(in).Find(&r).Error
 	return &r,err
+}
+
+func (s *{TplDaoName}) Find{TplModelName}ById(id)(r *{TplModelName},err error){
+	err = s.db.Where("id = ?",id).First(r).Error
+	return 
 }
 
 func (s *{TplDaoName}) List(in *{TplModelName}) ([]*{TplModelName},error) {

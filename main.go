@@ -94,13 +94,7 @@ func main() {
 			Name:   "model",
 			Usage:  "gen table model",
 			Flags:  modelFlag(),
-			Action: modelAction(false),
-		},
-		{
-			Name:   "model-v2",
-			Usage:  "gen table model",
-			Flags:  modelFlag(),
-			Action: modelAction(true),
+			Action: modelAction(),
 		},
 		{
 			Name:      "version",
@@ -147,7 +141,7 @@ func modelFlag() []cli.Flag {
 	}
 }
 
-func modelAction(v2 bool) func(ctx *cli.Context) error {
+func modelAction() func(ctx *cli.Context) error {
 	return func(ctx *cli.Context) error {
 		dsn := ctx.String("dsn")
 		if dsn == "" {
@@ -179,11 +173,6 @@ func modelAction(v2 bool) func(ctx *cli.Context) error {
 		}
 
 		tables := strings.Split(t, ",")
-		if v2 {
-			return GenModelV2(context.Background(), dsn, path, "", configPath, key, tables...)
-		} else {
-			// return GenModel(dsn, path, configPath, key, tables...)
-			return nil
-		}
+		return GenModel(context.Background(), dsn, path, "", configPath, key, tables...)
 	}
 }
