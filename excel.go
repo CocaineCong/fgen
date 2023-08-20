@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"reflect"
 	"strings"
 
-	excelize "github.com/xuri/excelize/v2"
+	"github.com/xuri/excelize/v2"
 )
 
 const (
@@ -23,7 +21,10 @@ func WriteXlsx(xlsx *excelize.File, sheetName string, records []interface{}) (*e
 
 func writeToBuffer(xlsx *excelize.File, sheetName string, records []interface{}) (*excelize.File, error) {
 	var err error
-	xlsx.NewSheet(sheetName)
+	_, err = xlsx.NewSheet(sheetName)
+	if err != nil {
+		return nil, err
+	}
 	for i, t := range records {
 		d := reflect.TypeOf(t).Elem()
 		for j := 0; j < d.NumField(); j++ {
@@ -68,45 +69,6 @@ func writeToBuffer(xlsx *excelize.File, sheetName string, records []interface{})
 		}
 	}
 	return xlsx, nil
-}
-
-func readToStruct(reader io.Reader, sheetName string, result interface{}) error {
-	xlsx, err := excelize.OpenReader(reader)
-	if err != nil {
-		return err
-	}
-
-	rows, err := xlsx.GetRows(sheetName)
-	if err != nil {
-		return err
-	}
-
-	if len(rows) <= 1 {
-		return nil
-	}
-
-	columns := rows[0]
-	columnJson := getColumnJson(result)
-	var records []map[string]interface{}
-	for i, row := range rows {
-		if i == 0 {
-			continue
-		}
-		record := make(map[string]interface{})
-
-		for f, c := range row {
-			column := columns[f]
-			if j, ok := columnJson[column]; ok {
-				record[j] = c
-			}
-		}
-		records = append(records, record)
-	}
-
-	bs, _ := json.Marshal(records)
-	err = json.Unmarshal(bs, &result)
-
-	return err
 }
 
 func getColumnJson(model interface{}) map[string]string {

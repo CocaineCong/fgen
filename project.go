@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gfile"
@@ -130,14 +132,13 @@ func GenProject(projectPath, projectName string) error {
 		default:
 			if err := gfile.Mkdir(genPath); err != nil {
 				glog.Fatal("mkdir for generating path:%s failed: %v", genPath, err)
+				return err
 			}
 		}
 	}
 
-	pingCmd := exec.Command("ping", "-c 5 baidu.com")
-	_, err := pingCmd.CombinedOutput()
-	if err != nil {
-		fmt.Println("err", err)
+	if err := pingBaidu(); err != nil {
+		fmt.Println("网络异常", err)
 		return err
 	}
 
@@ -146,12 +147,13 @@ func GenProject(projectPath, projectName string) error {
 	})
 	scriptPath := projectPath + "start.sh"
 	if err := writeFile(scriptPath, entityContent); err != nil {
+		fmt.Println("写入脚本错误", err)
 		return err
 	}
 	cmd := exec.Command("bash", scriptPath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("err", err)
+		fmt.Println("启动脚本错误", err)
 		return err
 	}
 	fmt.Println("output", string(output))
@@ -181,4 +183,18 @@ func writeFile(path, content string) error {
 	err = write.Flush()
 
 	return err
+}
+
+func pingBaidu() error {
+	hostname := "baidu.com"
+	timeout := time.Second * 5
+
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:80", hostname), timeout)
+	if err != nil {
+		return err
+	}
+
+	defer conn.Close()
+
+	return nil
 }

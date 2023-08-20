@@ -53,44 +53,6 @@ func main() {
 			},
 		},
 		{
-			Name:  "pprof",
-			Usage: "create pprof report",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "ip",
-					Usage: "ip address",
-					Value: "10.22.134.150",
-				},
-				cli.StringFlag{
-					Name:  "type",
-					Usage: "options: profile、goroutine、heap",
-				},
-				cli.StringFlag{
-					Name:  "seconds",
-					Usage: "采集时长",
-				},
-				cli.IntFlag{
-					Name:  "n",
-					Usage: "top n",
-				},
-			},
-			Action: func(ctx *cli.Context) error {
-				ip := ctx.String("ip")
-				_type := ctx.String("type")
-				seconds := ctx.Int("seconds")
-				line := ctx.Int("n")
-				if ip == "" {
-					return errors.New("must input service ip")
-				}
-				ip = strings.TrimSpace(ip)
-				var options []string
-				if _type != "" {
-					options = strings.Split(_type, ",")
-				}
-				return GenReport(ip, seconds, line, options...)
-			},
-		},
-		{
 			Name:   "model",
 			Usage:  "gen table model",
 			Flags:  modelFlag(),
